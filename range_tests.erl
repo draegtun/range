@@ -1,6 +1,8 @@
 -module(range_tests).
 -include_lib("eunit/include/eunit.hrl").
 
+% Some of these tests contain internal details.  Keep for now but may remove
+
 seq_invalid_test() ->
     ?assertThrow(range_seq_invalid, range:seq(4,4)),
     ?assertThrow(range_seq_invalid, range:seq(4,3)),
@@ -80,6 +82,17 @@ forever_test() ->
     {2, N1} = range:next(Seq),
     {3, N2} = range:next(N1),
     ?assertEqual({4, {forever, 5}}, range:next(N2)).
+
+repeat_test() ->
+    Seq = range:repeat(it),
+    {it, N1} = range:next(Seq),
+    {it, N2} = range:next(N1),
+    ?assertEqual({it, {repeat, it}}, range:next(N2)).
+
+repeat_fun_test() ->
+    Seq = range:repeat(fun() -> "I" ++ "T" end),
+    {"IT", N1} = range:next(Seq),
+    {"IT", _N2} = range:next(N1).
 
 cycle_test() ->
     Seq = range:seq(1,3),

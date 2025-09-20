@@ -1,7 +1,8 @@
 -module(range).
 -export [seq/2, seq/3, generate/2, wrap/2, next/1].
--export [upto/1, countdown/1, forever/0, forever/1].
+-export [upto/1, countdown/1, forever/0, forever/1, repeat/1].
 -export [cycle/1].
+-export [to_list/1].
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -39,6 +40,10 @@ next({down, From, To, Step}) when From >= To ->
 next({forever, N}) ->
 	Next = {forever, N+1},
 	{N, Next};
+next({repeat, Fun} = Next) when is_function(Fun) ->
+	{Fun(), Next};
+next({repeat, It} = Next) ->
+	{It, Next};
 next({function, Fun, N}) ->
 	Next = Fun(N),
 	{N, {function, Fun, Next}};
@@ -72,6 +77,11 @@ forever() ->
 forever(From) when is_integer(From) ->
 	{forever, From}.
 
+% repeat(something) will just keep repeating 'something'
+% Unlike forever, it's not building an integer, so lighter if really forever :)
+% and if you provide a Fun/0 then it will run it each time
+repeat(It) ->
+	{repeat, It}.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -95,6 +105,27 @@ cycle2(Seq0) ->
 		end
 	end,
 	wrap(Fun, Seq0).
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% List functions
+
+% to_list - if number sequence then convert to list
+%           if not (ie. function wrap), then return 'infinite'
+to_list({up, _, _, _} = Seq) ->
+	to_list1(Seq, []);
+to_list({down, _, _, _} = Seq) ->
+	to_list1(Seq, []);
+to_list(_) ->
+	infinite.
+
+to_list1(Seq, Acc) ->
+	case range:next(Seq) of
+		done ->
+			lists:reverse(Acc);
+		{Value, Next} ->
+			to_list1(Next, [Value | Acc])
+	end.
 
 
 
