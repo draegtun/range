@@ -78,21 +78,10 @@ countdown_test() ->
     ?assertEqual(done, range:next(N2)).
 
 forever_test() ->
-    Seq = range:forever(2),
-    {2, N1} = range:next(Seq),
-    {3, N2} = range:next(N1),
-    ?assertEqual({4, {forever, 5}}, range:next(N2)).
-
-repeat_test() ->
-    Seq = range:repeat(it),
-    {it, N1} = range:next(Seq),
-    {it, N2} = range:next(N1),
-    ?assertEqual({it, {repeat, it}}, range:next(N2)).
-
-repeat_fun_test() ->
-    Seq = range:repeat(fun() -> "I" ++ "T" end),
-    {"IT", N1} = range:next(Seq),
-    {"IT", _N2} = range:next(N1).
+    Seq = range:forever(),
+    {1, N1} = range:next(Seq),
+    {2, N2} = range:next(N1),
+    ?assertEqual({3, {forever, 4}}, range:next(N2)).
 
 cycle_test() ->
     Seq = range:seq(1,3),

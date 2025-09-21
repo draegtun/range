@@ -1,6 +1,6 @@
 -module(range).
 -export [seq/2, seq/3, generate/2, wrap/2, next/1].
--export [upto/1, countdown/1, forever/0, forever/1, repeat/1].
+-export [upto/1, countdown/1, forever/0].
 -export [cycle/1].
 -export [to_list/1].
 
@@ -19,7 +19,7 @@ seq(From, To, Step) when is_number(From), is_number(To), is_number(Step) ->
 		Step < 0, From > To ->
 			{down, From, To, Step};
 		true ->
-			throw(range_seq_invalid)
+			throw(range_seq_invalid)   % TODO change this to empty sequence?
 	end.
 
 % function! Could return anything but N must be integer
@@ -40,10 +40,6 @@ next({down, From, To, Step}) when From >= To ->
 next({forever, N}) ->
 	Next = {forever, N+1},
 	{N, Next};
-next({repeat, Fun} = Next) when is_function(Fun) ->
-	{Fun(), Next};
-next({repeat, It} = Next) ->
-	{It, Next};
 next({function, Fun, N}) ->
 	Next = Fun(N),
 	{N, {function, Fun, Next}};
@@ -74,14 +70,8 @@ countdown(N) when is_integer(N) andalso N > 0 ->
 forever() ->
 	forever(1).
 
-forever(From) when is_integer(From) ->
-	{forever, From}.
-
-% repeat(something) will just keep repeating 'something'
-% Unlike forever, it's not building an integer, so lighter if really forever :)
-% and if you provide a Fun/0 then it will run it each time
-repeat(It) ->
-	{repeat, It}.
+forever(Count) when is_integer(Count) ->
+	{forever, Count}.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -112,6 +102,7 @@ cycle2(Seq0) ->
 
 % to_list - if number sequence then convert to list
 %           if not (ie. function wrap), then return 'infinite'
+%			NB. Need to use take() on an infinite list
 to_list({up, _, _, _} = Seq) ->
 	to_list1(Seq, []);
 to_list({down, _, _, _} = Seq) ->
