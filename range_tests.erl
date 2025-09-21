@@ -65,6 +65,13 @@ seq_step_float_down_test() ->
 seq_next_silly_test() ->
     ?assertThrow(range_seq_exhausted, range:next(done)).
 
+generate_test() ->
+    Fun = fun(N) -> N*2 end, 
+    Seq = range:generate(Fun, 2),
+    {2, N1} = range:next(Seq),
+    {4, N2} = range:next(N1),
+    {8, _} = range:next(N2).
+
 upto_test() ->
     Seq = range:upto(2),
     {0, N1} = range:next(Seq),
@@ -97,6 +104,13 @@ cycle_invalid_test() ->
     Seq = range:forever(),
     ?assertThrow(range_cycle_invalid, range:cycle(Seq)).
 
-    
+map_test() ->
+    Seq = range:seq(1,3),
+    Map = range:map(fun(V) -> V + 10 end, Seq),
+    {11, N1} = range:next(Map),
+    {12, N2} = range:next(N1),
+    {13, N3} = range:next(N2),
+    ?assertEqual(done, range:next(N3)).
+
 
 % how do you use iterator in List comp?   You can't, must be a list!!
